@@ -16,7 +16,7 @@ RUN mkdir /var/run/sshd
 RUN printf admin\\nadmin\\n | passwd
 
 # Install MySQL
-RUN apt-get install -y mysql-server mysql-client
+RUN apt-get install -y mysql-server mysql-client libmysqlclient-dev
 
 # Install Apache
 RUN apt-get install -y apache2
