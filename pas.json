@@ -7,13 +7,7 @@
         "containers": {
             "mysql": {
         		"ports": [
-                    "3306:3306"
-                ],
-        		"ports": [
-        		    "49160:22"
-        		],
-        		"ports": [
-                    "49161:80"
+                    "3306:3306", "49160:22", "49161:80"
                 ],
                 "env": {
                     "MYSQL_ROOT_PASSWORD": "password"
