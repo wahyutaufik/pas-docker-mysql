@@ -1,13 +1,14 @@
 {
-	"name": "wahyutaufik/mysql",
-	"profile": "docker",
-	"docker": {
-	    "containers": {
-			"root": {
-			    "ports": [
-					"3306:3306"
-			    ]
-			}
-	    }
-	}
+    "name": "wahyutaufik/mysql",
+    "profile": "docker",
+
+    "docker": {
+        "containers": {
+            "root": {
+                "ports": [
+                    "3306:3306"
+                ]
+            }
+        }
+    }
 }
