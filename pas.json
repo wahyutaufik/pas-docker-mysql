@@ -1,0 +1,28 @@
+{
+    "name": "xinix/docker-sql",
+    "version": "1.0.0",
+    "profile": "docker",
+
+    "docker": {
+        "containers": {
+            "mysql": {
+        		"ports": [
+                    "3306:3306"
+                ],
+        		"ports": [
+        		    "49160:22"
+        		],
+        		"ports": [
+                    "49161:80"
+                ],
+                "env": {
+                    "MYSQL_ROOT_PASSWORD": "password"
+                },
+                "volumes": [
+                    "./srv/db/mysql:/var/lib/mysql"
+                ]
+            }
+        }
+    }
+}
+
