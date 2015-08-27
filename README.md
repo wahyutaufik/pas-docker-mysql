@@ -8,14 +8,7 @@ $ cd pas-docker-mysql
 $ pas up
 ```
 
-Open http://localhost:49161/phpmyadmin in your browser with following credential:
+Access to container:
 ```
-username: root
-password: password
-```
-
-Login by SSH
-```
-ssh root@localhost -p 49160
-password: admin
+$ docker exec -ti xinix-docker-sql-mysql-0 bash
 ```
