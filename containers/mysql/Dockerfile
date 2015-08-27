@@ -1,51 +1,37 @@
-FROM debian:wheezy
-
+FROM ubuntu:trusty
 MAINTAINER Wahyu Taufik <wahyutaufik37@gmail.com>
 
-ENV DEBIAN_FRONTEND noninteractive
+# Add MySQL configuration
+ADD my.cnf /etc/mysql/conf.d/my.cnf
+ADD mysqld_charset.cnf /etc/mysql/conf.d/mysqld_charset.cnf
 
-COPY root/etc/apt /etc/apt
+RUN apt-get update && \
+    apt-get -yq install mysql-server-5.5 pwgen && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm /etc/mysql/conf.d/mysqld_safe_syslog.cnf && \
+    if [ ! -f /usr/share/mysql/my-default.cnf ] ; then cp /etc/mysql/my.cnf /usr/share/mysql/my-default.cnf; fi && \
+    mysql_install_db > /dev/null 2>&1 && \
+    touch /var/lib/mysql/.EMPTY_DB
 
-RUN apt-get update -y
+# Add MySQL scripts
+ADD import_sql.sh /import_sql.sh
+ADD run.sh /run.sh
 
-# Install MySQL
-RUN apt-get install -y mysql-server mysql-client libmysqlclient-dev
-# Install Apache
-RUN apt-get install -y apache2
-# Install php
-RUN apt-get install -y php5 libapache2-mod-php5 php5-mcrypt php5-mysql
+ENV MYSQL_USER=admin \
+    MYSQL_PASS=**Random** \
+    ON_CREATE_DB=**False** \
+    REPLICATION_MASTER=**False** \
+    REPLICATION_SLAVE=**False** \
+    REPLICATION_USER=replica \
+    REPLICATION_PASS=replica \
+    ON_CREATE_DB=**False**
 
-# Install expect
-RUN apt-get install -y expect
+# Add VOLUMEs to allow backup of config and databases
+# VOLUME  ["/etc/mysql", "/var/lib/mysql"]
 
-# Install phpMyAdmin
-RUN echo '#!/usr/bin/expect -f' > install-phpmyadmin.sh; \
-	echo "set timeout -1" >> install-phpmyadmin.sh; \
-	echo "spawn apt-get install -y phpmyadmin" >> install-phpmyadmin.sh; \
-	echo "expect \"Configure database for phpmyadmin with dbconfig-common?\"" >> install-phpmyadmin.sh; \
-	echo "send \"y\r\"" >> install-phpmyadmin.sh; \
-	echo "expect \"Password of the database's administrative user:\"" >> install-phpmyadmin.sh; \
-	echo "send \"\r\"" >> install-phpmyadmin.sh; \
-	echo "expect \"MySQL application password for phpmyadmin:\"" >> install-phpmyadmin.sh; \
-	echo "send \"\r\"" >> install-phpmyadmin.sh; \
-	echo "expect \"Web server to reconfigure automatically:\"" >> install-phpmyadmin.sh; \
-	echo "send \"1\r\"" >> install-phpmyadmin.sh
-RUN chmod +x install-phpmyadmin.sh
+RUN /usr/sbin/usermod -u 1000 mysql && \
+    /usr/sbin/groupmod -g 1000 mysql && \
+    /bin/chown -R mysql:mysql /var/run/mysqld
 
-RUN mysqld & \
-	service apache2 start; \
-	sleep 5; \
-	./install-phpmyadmin.sh; \
-	sleep 10; \
-	mysqladmin -u root shutdown
-
-RUN rm install-phpmyadmin.sh
-
-RUN sed -i "s#// \$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#g" /etc/phpmyadmin/config.inc.php 
-
-EXPOSE 22
-EXPOSE 80
 EXPOSE 3306
-
-CMD service apache2 start; \
-	mysqld_safe
+CMD ["/run.sh"]
